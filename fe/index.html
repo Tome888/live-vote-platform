@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Live Vote Platform</title>
+    </head>
+    <body>
+        <button onclick="createRoom()">Create Room</button>
+        <script>
+            function createRoom() {
+                const name = prompt("Enter room name:");
+
+                if (!name) return;
+
+                fetch("http://localhost:4200/create-room", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ name: name }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log(data);
+                        localStorage.setItem("roomName", data);
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                    });
+            }
+        </script>
+    </body>
+</html>
