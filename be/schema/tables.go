@@ -11,13 +11,20 @@ func CreateTables(db *sqlx.DB) error {
 	db.MustExec("PRAGMA foreign_keys = ON;")
 
 	schema := `
-	CREATE TABLE IF NOT EXISTS room (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name VARCHAR(255) NOT NULL,
-    connection_key VARCHAR(255) DEFAULT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-	`
+		CREATE TABLE IF NOT EXISTS room (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			connection_key TEXT DEFAULT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+		);
+
+		CREATE TABLE IF NOT EXISTS subjects (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			room_id INTEGER NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (room_id) REFERENCES room(id)
+		);`
 	db.MustExec(schema)
 	return nil
 }

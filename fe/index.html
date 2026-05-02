@@ -5,7 +5,33 @@
     </head>
     <body>
         <button onclick="createRoom()">Create Room</button>
+        <button onclick="createSubject()">Create Subject</button>
+
         <script>
+            function createSubject() {
+                const name = prompt("Enter subject name:");
+                const connection_key = prompt("Enter connection key:");
+
+                if (!name || !connection_key) return;
+                fetch("http://localhost:4200/create-subjects", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        token: connection_key,
+                    }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log(data);
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                    });
+            }
+
             function createRoom() {
                 const name = prompt("Enter room name:");
 

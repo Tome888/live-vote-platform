@@ -27,5 +27,6 @@ func main() {
 
 	app.Get("/", handlers.HelloHandler)
 	app.Post("/create-room", handlers.CreateRoomHandler(db))
+	app.Post("/create-subjects", handlers.CreateSubjectHandler(db))
 	log.Fatal(app.Listen(":4200"))
 }
