@@ -44,7 +44,7 @@ func CreateSubjectHandler(db *sqlx.DB) fiber.Handler {
 			})
 		}
 
-		err = db.QueryRow(`SELECT EXISTS(SELECT 1 FROM room WHERE id = ? AND name = ?)`, claims.RoomId, claims.Name).Scan(&exists)
+		err = db.QueryRow(`SELECT EXISTS(SELECT 1 FROM room WHERE id = ?)`, claims.RoomId).Scan(&exists)
 
 		if err != nil {
 			fmt.Println("4")
