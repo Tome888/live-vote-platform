@@ -23,7 +23,7 @@ func CreateTables(db *sqlx.DB) error {
 			name TEXT NOT NULL,
 			room_id INTEGER NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (room_id) REFERENCES room(id)
+			FOREIGN KEY (room_id) REFERENCES room(id) ON DELETE CASCADE
 		);`
 	db.MustExec(schema)
 	return nil
