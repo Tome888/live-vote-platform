@@ -32,6 +32,8 @@ func CreateTables(db *sqlx.DB) error {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         room_id INTEGER NOT NULL, -- Use ID instead of the full JWT string
         voter_token TEXT NOT NULL UNIQUE,
+        name TEXT NOT NULL,
+        expires_at DATETIME NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (room_id) REFERENCES room(id) ON DELETE CASCADE -- Faster indexing
         );`

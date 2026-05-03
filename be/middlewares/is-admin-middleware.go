@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"my-fiber-app/secret"
 	"strings"
 
@@ -35,7 +34,6 @@ func IsAdminMiddleware(c fiber.Ctx) error {
 		return fiber.ErrUnauthorized
 	}
 
-	fmt.Println(claims)
 	if claims["role"] != "admin" {
 		return fiber.NewError(fiber.StatusForbidden, "Admin privileges required")
 	}

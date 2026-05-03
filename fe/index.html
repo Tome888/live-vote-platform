@@ -62,17 +62,35 @@
 
             function createSubToken() {
                 const role = prompt("Enter sub token role:");
+                const name = prompt("Enter sub token name:");
 
                 if (!role) return;
+                if (!name) return;
                 const room = JSON.parse(localStorage.getItem("roomName"));
 
+                const expires_at = new Date(
+                    new Date().getTime() + 12 * 60 * 60 * 1000,
+                ).toISOString();
+                console.log(room);
+
+                console.log({
+                    room_id: room.info.room_id,
+                    role,
+                    expires_at,
+                    name,
+                });
                 fetch("http://localhost:4200/admin/create-sub-token", {
                     method: "POST",
                     headers: {
                         Authorization: "Bearer " + room.connection_key,
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ role }),
+                    body: JSON.stringify({
+                        roomId: room.info.room_id,
+                        role,
+                        expiresAt: expires_at,
+                        name,
+                    }),
                 })
                     .then((response) => response.json())
                     .then((data) => {
