@@ -1,84 +1,51 @@
 package handlers
 
 import (
-	"fmt"
-	"my-fiber-app/secret"
 	"my-fiber-app/structs"
-	"strings"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/jmoiron/sqlx"
 )
 
 func CreateSubjectHandler(db *sqlx.DB) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		var req structs.CreateSubjectRequest
-		secretStr := secret.GetSecret()
-		claims := &structs.RoomToken{}
-		var exists bool
+
+		rawRoomID := c.Locals("admin_room_id")
+
+		var roomID int64
+		if f, ok := rawRoomID.(float64); ok {
+			roomID = int64(f)
+		} else if i, ok := rawRoomID.(int64); ok {
+			roomID = i
+		}
 
 		if err := c.Bind().JSON(&req); err != nil {
-			fmt.Println("1")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error(), "flag": "1"})
 		}
 
-		if req.Token == "" {
-			fmt.Println("2")
-
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "token is required", "flag": "2"})
-		}
-
-		cleanToken := strings.Trim(req.Token, " \n\r\t\"")
-
-		_, err := jwt.ParseWithClaims(cleanToken, claims, func(token *jwt.Token) (any, error) {
-			return []byte(secretStr), nil
-		})
-
+		var exists bool
+		err := db.Get(&exists, "SELECT EXISTS(SELECT 1 FROM room WHERE id = ?)", roomID)
 		if err != nil {
-			fmt.Println("3", req.Token, claims)
-
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error":   "invalid token",
-				"details": err.Error(),
-			})
-		}
-
-		if claims.Role != "admin" {
-			fmt.Println("4.5")
-
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "only admins can create subjects", "flag": "4.5"})
-		}
-
-		err = db.QueryRow(`SELECT EXISTS(SELECT 1 FROM room WHERE id = ?)`, claims.RoomId).Scan(&exists)
-
-		if err != nil {
-			fmt.Println("4")
-
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error(), "flag": "4"})
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "DB check failed", "flag": "4"})
 		}
 
 		if !exists {
-			fmt.Println("5")
-
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "room not found", "flag": "5"})
 		}
 
-		res, err := db.Exec("INSERT INTO subjects (name, room_id) VALUES (?, ?)", req.Name, claims.RoomId)
-
+		res, err := db.Exec("INSERT INTO subjects (name, room_id) VALUES (?, ?)", req.Name, roomID)
 		if err != nil {
-			fmt.Println("6")
-
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error(), "flag": "6"})
 		}
 
-		subjectId, err := res.LastInsertId()
+		subjectId, _ := res.LastInsertId()
 
-		if err != nil {
-			fmt.Println("7")
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error(), "flag": "7"})
-		}
-
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "subject created", "room_id": claims.RoomId, "subject_id": subjectId, "name": req.Name})
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"message":    "subject created",
+			"room_id":    roomID,
+			"subject_id": subjectId,
+			"name":       req.Name,
+		})
 	}
 }

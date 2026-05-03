@@ -11,17 +11,18 @@
         <script>
             function createSubject() {
                 const name = prompt("Enter subject name:");
-                const connection_key = prompt("Enter connection key:");
-
-                if (!name || !connection_key) return;
-                fetch("http://localhost:4200/create-subjects", {
+                // const connection_key = prompt("Enter connection key:");
+                const room = JSON.parse(localStorage.getItem("roomName"));
+                if (!name) return;
+                fetch("http://localhost:4200/admin/create-subjects", {
                     method: "POST",
                     headers: {
+                        Authorization: "Bearer " + room.connection_key,
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
                         name: name,
-                        token: connection_key,
+                        // token: connection_key,
                     }),
                 })
                     .then((response) => response.json())

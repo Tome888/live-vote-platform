@@ -28,11 +28,12 @@ func main() {
 
 	app.Get("/", handlers.HelloHandler)
 	app.Post("/create-room", handlers.CreateRoomHandler(db))
-	app.Post("/create-subjects", handlers.CreateSubjectHandler(db))
-	app.Post("/create-sub-token", handlers.CreateSubToken(db))
+	// app.Post("/create-subjects", handlers.CreateSubjectHandler(db))
+	// app.Post("/create-sub-token", handlers.CreateSubToken(db))
 
 	admin := app.Group("/admin", middlewares.IsAdminMiddleware)
 	admin.Post("/create-sub-token", handlers.CreateSubToken(db))
+	admin.Post("/create-subjects", handlers.CreateSubjectHandler(db))
 
 	log.Fatal(app.Listen(":4200"))
 }
