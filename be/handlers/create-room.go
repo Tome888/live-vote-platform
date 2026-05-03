@@ -21,7 +21,7 @@ func CreateRoomHandler(db *sqlx.DB) fiber.Handler {
 			return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 		}
 
-		res, err := db.Exec("INSERT INTO room (name) VALUES (?)", roomData.Name)
+		res, err := db.Exec("INSERT INTO room (name, voting_type, room_expires_at) VALUES (?, ?, ?)", roomData.Name, roomData.VoteType, roomData.RoomExpiresAt)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 		}
@@ -32,9 +32,12 @@ func CreateRoomHandler(db *sqlx.DB) fiber.Handler {
 		}
 
 		jwtContent := jwt.MapClaims{
-			"room_id": roomID,
-			"name":    roomData.Name,
-			"iat":     time.Now().Unix(),
+			"room_id":         roomID,
+			"name":            roomData.Name,
+			"vote_type":       roomData.VoteType,
+			"room_expires_at": roomData.RoomExpiresAt,
+			"role":            "admin",
+			"iat":             time.Now().Unix(),
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtContent)

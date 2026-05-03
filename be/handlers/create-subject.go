@@ -44,6 +44,12 @@ func CreateSubjectHandler(db *sqlx.DB) fiber.Handler {
 			})
 		}
 
+		if claims.Role != "admin" {
+			fmt.Println("4.5")
+
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "only admins can create subjects", "flag": "4.5"})
+		}
+
 		err = db.QueryRow(`SELECT EXISTS(SELECT 1 FROM room WHERE id = ?)`, claims.RoomId).Scan(&exists)
 
 		if err != nil {

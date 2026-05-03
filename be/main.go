@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"my-fiber-app/handlers"
+	"my-fiber-app/middlewares"
 	"my-fiber-app/schema"
 
 	"github.com/gofiber/fiber/v3"
@@ -28,5 +29,10 @@ func main() {
 	app.Get("/", handlers.HelloHandler)
 	app.Post("/create-room", handlers.CreateRoomHandler(db))
 	app.Post("/create-subjects", handlers.CreateSubjectHandler(db))
+	app.Post("/create-sub-token", handlers.CreateSubToken(db))
+
+	admin := app.Group("/admin", middlewares.IsAdminMiddleware)
+	admin.Post("/create-sub-token", handlers.CreateSubToken(db))
+
 	log.Fatal(app.Listen(":4200"))
 }

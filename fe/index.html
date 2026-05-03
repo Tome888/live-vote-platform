@@ -6,6 +6,7 @@
     <body>
         <button onclick="createRoom()">Create Room</button>
         <button onclick="createSubject()">Create Subject</button>
+        <button onclick="createSubToken()">Create Sub Token</button>
 
         <script>
             function createSubject() {
@@ -34,20 +35,48 @@
 
             function createRoom() {
                 const name = prompt("Enter room name:");
+                const voteType = prompt("Enter voting type:");
 
-                if (!name) return;
+                if (!name || !voteType) return;
+
+                const roomExpiresAt = new Date(
+                    new Date().getTime() + 24 * 60 * 60 * 1000,
+                ).toISOString();
 
                 fetch("http://localhost:4200/create-room", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ name: name }),
+                    body: JSON.stringify({ name, voteType, roomExpiresAt }),
                 })
                     .then((response) => response.json())
                     .then((data) => {
                         console.log(data);
-                        localStorage.setItem("roomName", data);
+                        localStorage.setItem("roomName", JSON.stringify(data));
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                    });
+            }
+
+            function createSubToken() {
+                const role = prompt("Enter sub token role:");
+
+                if (!role) return;
+                const room = JSON.parse(localStorage.getItem("roomName"));
+
+                fetch("http://localhost:4200/admin/create-sub-token", {
+                    method: "POST",
+                    headers: {
+                        Authorization: "Bearer " + room.connection_key,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ role }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log(data);
                     })
                     .catch((error) => {
                         console.error("Error:", error);
